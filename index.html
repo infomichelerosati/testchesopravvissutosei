@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Personalità di Sopravvivenza</title>
+    <!-- Caricamento di Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Usiamo il font Inter, che è un font sans-serif pulito e moderno */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Animazione di fade-in per le schermate */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+
+        /* Animazione per la comparsa della domanda */
+        #question-text {
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        /* Stile per l'opzione selezionata */
+        .option-btn.selected {
+            background-color: #3b82f6; /* bg-blue-600 */
+            border-color: #93c5fd; /* border-blue-300 */
+            box-shadow: 0 0 0 2px #60a5fa; /* ring-2 ring-blue-400 */
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 flex items-center justify-center min-h-screen p-4">
+
+    <!-- Contenitore principale dell'app -->
+    <div id="app-container" class="bg-gray-800 p-6 sm:p-10 rounded-2xl shadow-2xl max-w-2xl w-full min-h-[400px] flex flex-col justify-center">
+
+        <!-- 1. Schermata Iniziale -->
+        <div id="start-screen" class="text-center fade-in">
+            <h1 class="text-3xl sm:text-4xl font-bold text-blue-300 mb-4">A quale tipo di Sopravvissuto appartieni?</h1>
+            <p class="text-lg text-gray-300 mb-8">
+                Basato sul "Report sulle Differenze di Personalità Umana Classificate in 10 Tipi per la Sopravvivenza".
+            </p>
+            <p class="text-md text-gray-400 mb-8">Rispondi a 20 domande per scoprire il tuo approccio dominante alla sopravvivenza.</p>
+            <button id="start-btn" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition-all duration-300 shadow-lg transform hover:scale-105">
+                Inizia il Test
+            </button>
+        </div>
+
+        <!-- 2. Schermata Quiz (Nascosta di default) -->
+        <div id="quiz-screen" class="hidden">
+            <div id="quiz-header" class="mb-6">
+                <p id="question-counter" class="text-right text-blue-300 font-semibold">Domanda 1 / 20</p>
+                <h2 id="question-text" class="text-2xl sm:text-3xl font-bold mt-2 min-h-[100px]"></h2>
+            </div>
+            
+            <!-- ***** INIZIO CODICE CORRETTO ***** -->
+            <!-- Questo contenitore era mancante e causava l'errore -->
+            <div id="options-container" class="flex flex-col gap-3">
+                <!-- Le opzioni verranno inserite qui da JS -->
+            </div>
+            <!-- ***** FINE CODICE CORRETTO ***** -->
+
+            <!-- Il pulsante "Prossima" è stato rimosso -->
+            <!-- <button id="next-btn" ... >Prossima</button> -->
+        </div>
+
+        <!-- 3. Schermata Risultati (Nascosta di default) -->
+        <div id="result-screen" class="hidden text-left fade-in">
+            <h1 class="text-3xl sm:text-4xl font-bold text-blue-300 mb-6 text-center">Il tuo Profilo di Sopravvivenza</h1>
+            
+            <!-- Contenitore per i risultati dinamici -->
+            <div id="results-container">
+                <!-- I risultati verranno inseriti qui da JS -->
+            </div>
+
+            <!-- Sezione Call to Action (CTA) -->
+            <div id="cta-section" class="mt-8 text-center">
+                <!-- I bottoni verranno inseriti qui da JS -->
+            </div>
+
+            <button id="restart-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition-all duration-300 shadow-lg transform hover:scale-105 mt-8">
+                Rifai il Test
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // --- DATABASE DEL QUIZ ---
+
+            // Descrizioni dei 10 Tipi di Personalità
+            const typeDescriptions = {
+                Leader: {
+                    title: "Il Leader Organizzatore",
+                    description: "Forte nel guidare gruppi, assegnare ruoli e mantenere l'ordine. In un ambiente urbano post-guerra, organizza squadre per razionare cibo; in natura, coordina la costruzione di rifugi. Debolezza: Può ignorare input individuali se troppo autoritario.",
+                    url: "https://spiritoindomito.it"
+                },
+                Resolver: {
+                    title: "Il Risolutore di Problemi",
+                    description: "Eccelle nel pensare strategicamente e trovare soluzioni creative a ostacoli. In una città disastrata, improvvisa armi da detriti; in natura, costruisce trappole per cibo. Debolezza: Potrebbe sovraccaricarsi analizzando troppo.",
+                    url: "https://spiritoindomito.it"
+                },
+                Altruist: {
+                    title: "L'Altruista Connettore",
+                    description: "Prioritizza l'aiuto agli altri, costruendo alleanze e supporto emotivo. In scenari urbani, forma comunità per condividere risorse; in natura, sacrifica per il gruppo. Debolezza: Rischia di trascurare la propria sopravvivenza.",
+                    url: "https://spiritoindomito.it"
+                },
+                Persistent: {
+                    title: "Lo Stubborn Persistente",
+                    description: "Non si arrende mai, mantenendo tenacia nonostante le avversità. In un disastro urbano, continua a scavare tra le macerie; in ambienti naturali, marcia per giorni senza cibo. Debolelezza: Può essere inflessibile a cambiamenti necessari.",
+                    url: "https://spiritoindomito.it"
+                },
+                Regulator: {
+                    title: "Il Regolatore Emotivo",
+                    description: "Gestisce lo stress e rimane calmo, evitando panico. In città sotto assedio, mantiene la lucidità during i bombardamenti; in natura, controlla la paura durante tempeste. Debolezza: Potrebbe sopprimere emozioni utili come la rabbia motivante.",
+                    url: "https://spiritoindomito.it"
+                },
+                Spiritual: {
+                    title: "Il Trascendente Spirituale",
+                    description: "Trova significato profondo nella sopravvivenza, usando fede o scopo per motivarsi. In ambienti urbani, ispira speranza tra sopravvissuti; in natura, medita per resilienza mentale. Debolezza: Può distaccarsi troppo dalla realtà pratica.",
+                    url: "https://spiritoindomito.it"
+                },
+                Maintainer: {
+                    title: "Il Mantenitore Attivo",
+                    description: "Focalizzato su salute fisica e mentale, ottimizzando energia e risorse. In disastri urbani, gestisce igiene per prevenire malattie; in natura, bilancia sonno e attività. Debolezza: Potrebbe essere troppo cauto, evitando rischi necessari.",
+                    url: "https://spiritoindomito.it"
+                },
+                Adaptable: {
+                    title: "L'Adattabile Flessibile",
+                    description: "Cambia rapidamente strategie in base alle circostanze. In una città in rovina, passa dal rovistare al baratto; in ambienti naturali, si adatta a climi variabili. Debolezza: Mancanza di piani a lungo termine.",
+                    url: "https://spiritoindomito.it"
+                },
+                Brave: {
+                    title: "Il Coraggioso Motivato",
+                    description: "Affronta paure con umorismo e motivazione interna (es. famiglia o fede). In scenari urbani, carica contro minacce; in natura, usa umorismo per mantenere morale. Debolezza: Rischio di impulsività.",
+                    url: "https://spiritoindomito.it"
+                },
+                Resilient: {
+                    title: "Il Resiliente Ottimista",
+                    description: "Rimbalza da fallimenti, mantenendo positività e accettazione della realtà. In disastri, vede opportunità nelle crisi; in natura, accetta perdite e riparte. Debolezza: Potrebbe minimizzare pericoli reali.",
+                    url: "https://spiritoindomito.it"
+                }
+            };
+            
+            // Array con tutte le domande del quiz
+            const quizData = [
+                // 1
+                {
+                    question: "In un ambiente urbano disastrato, trovi un gruppo di sopravvissuti in panico. Cosa fai per primo?",
+                    options: [
+                        { text: "Organizzi ruoli e piani per tutti.", type: "Leader" },
+                        { text: "Analizzi la situazione per trovare una soluzione pratica.", type: "Resolver" },
+                        { text: "Offri aiuto emotivo e condividi le tue risorse.", type: "Altruist" },
+                        { text: "Insisti per continuare nonostante le lamentele.", type: "Persistent" }
+                    ]
+                },
+                // 2
+                {
+                    question: "Durante una tempesta in natura, il tuo rifugio crolla. La tua reazione?",
+                    options: [
+                        { text: "Raduni gli altri per ricostruirlo in modo strutturato.", type: "Leader" },
+                        { text: "Improvvisi con materiali alternativi.", type: "Adaptable" },
+                        { text: "Mantieni la calma per non aggravare lo stress.", type: "Regulator" },
+                        { text: "Trovi motivazione nel pensare a un scopo più grande.", type: "Spiritual" }
+                    ]
+                },
+                // 3
+                {
+                    question: "Scarseggiano le risorse in una città post-guerra. Come gestisci?",
+                    options: [
+                        { text: "Distribuisci equamente e formi alleanze.", type: "Altruist" },
+                        { text: "Calcoli razionalmente come ottimizzarle.", type: "Resolver" },
+                        { text: "Mantieni routine per salute fisica.", type: "Maintainer" },
+                        { text: "Accetti la realtà e cerchi opportunità positive.", type: "Resilient" }
+                    ]
+                },
+                // 4
+                {
+                    question: "Affronti una minaccia animale in natura. La tua reazione dominante è:",
+                    options: [
+                        { text: "Prendi il comando per spaventarla via.", type: "Leader" },
+                        { text: "Usi umorismo per alleggerire la tensione.", type: "Brave" },
+                        { text: "Persisti nel difenderti senza arrenderti.", type: "Persistent" },
+                        { text: "Adatti la strategia in base al comportamento dell'animale.", type: "Adaptable" }
+                    ]
+                },
+                // 5
+                {
+                    question: "In un gruppo urbano, c'è conflitto per il cibo. Il tuo approccio?",
+                    options: [
+                        { text: "Medi con empatia per risolvere.", type: "Altruist" },
+                        { text: "Regola le tue emozioni per mediare.", type: "Regulator" },
+                        { text: "Insisti sulle regole sociali per mantenere ordine.", type: "Leader" },
+                        { text: "Trovi significato nel sacrificio collettivo.", type: "Spiritual" }
+                    ]
+                },
+                // 6
+                {
+                    question: "Ti perdi in natura sotto stress. Come procedi?",
+                    options: [
+                        { text: "Pianifichi passi logici per orientarti.", type: "Resolver" },
+                        { text: "Mantieni energia con pause e idratazione.", type: "Maintainer" },
+                        { text: "Rimani positivo focalizzandoti su ciò che va bene.", type: "Resilient" },
+                        { text: "Affronti la paura direttamente con coraggio.", type: "Brave" }
+                    ]
+                },
+                // 7
+                {
+                    question: "In una città disastrata, scopri un ferito. Decidi di:",
+                    options: [
+                        { text: "Aiutarlo a rischio personale.", type: "Altruist" },
+                        { text: "Valutare se è fattibile senza compromettere te.", type: "Resolver" },
+                        { text: "Persistere nell'assistenza nonostante ostacoli.", type: "Persistent" },
+                        { text: "Adattare il piano se la situazione cambia.", type: "Adaptable" }
+                    ]
+                },
+                // 8
+                {
+                    question: "Durante un'interruzione di corrente urbana prolungata, la tua priorità è:",
+                    options: [
+                        { text: "Organizzare turni per sicurezza.", type: "Leader" },
+                        { text: "Gestire lo stress con tecniche di calma.", type: "Regulator" },
+                        { text: "Trovare scopo spirituale nella resilienza.", type: "Spiritual" },
+                        { text: "Mantenere routine salutari.", type: "Maintainer" }
+                    ]
+                },
+                // 9
+                {
+                    question: "In natura, il cibo scarseggia. Tu:",
+                    options: [
+                        { text: "Motivi te stesso pensando a cari o fede.", type: "Brave" },
+                        { text: "Accetti la scarsità e cerchi alternative positive.", type: "Resilient" },
+                        { text: "Insisti a cacciare fino a successo.", type: "Persistent" },
+                        { text: "Aiuti altri a trovare cibo prima.", type: "Altruist" }
+                    ]
+                },
+                // 10
+                {
+                    question: "Un gruppo in disastro naturale si divide. Tu:",
+                    options: [
+                        { text: "Prendi leadership per riunirlo.", type: "Leader" },
+                        { text: "Risolvi il conflitto con logica.", type: "Resolver" },
+                        { text: "Ti adatti alla nuova situazione in solitaria, se necessario.", type: "Adaptable" },
+                        { text: "Regola emozioni per evitare panico.", type: "Regulator" }
+                    ]
+                },
+                // 11
+                {
+                    question: "In ambiente urbano post-bellico, affronti dei ladri. La tua reazione è:",
+                    options: [
+                        { text: "Trovare umorismo nella situazione per non congelarti.", type: "Brave" },
+                        { text: "Persistere nella difesa del tuo spazio.", type: "Persistent" },
+                        { text: "Preoccuparti di come manterrai la salute mentale dopo l'evento.", type: "Maintainer" },
+                        { text: "Cercare di connetterti emotivamente per negoziare.", type: "Altruist" }
+                    ]
+                },
+                // 12
+                {
+                    question: "Una ferita in natura ti rallenta. Reagisci:",
+                    options: [
+                        { text: "Accetti e pianifichi intorno ad essa.", type: "Resilient" },
+                        { text: "Trovi significato nel superarla.", type: "Spiritual" },
+                        { text: "Improvvisa cure con risorse disponibili.", type: "Resolver" },
+                        { text: "Adatti il percorso per minimizzare stress.", type: "Adaptable" }
+                    ]
+                },
+                // 13
+                {
+                    question: "In città disastrata, morale basso. Tu:",
+                    options: [
+                        { text: "Organizzi attività di gruppo.", type: "Leader" },
+                        { text: "Offri supporto uno-a-uno.", type: "Altruist" },
+                        { text: "Regola il tuo stress per ispirare.", type: "Regulator" },
+                        { text: "Mantieni ottimismo condiviso.", type: "Resilient" }
+                    ]
+                },
+                // 14
+                {
+                    question: "Minaccia ambientale (es. inondazione). Priorità:",
+                    options: [
+                        { text: "Persisti nel evacuare nonostante fatica.", type: "Persistent" },
+                        { text: "Motivi con pensieri su sopravvivenza a lungo.", type: "Brave" },
+                        { text: "Mantieni routine per energia.", type: "Maintainer" },
+                        { text: "Trovi scopo nel proteggere vita.", type: "Spiritual" }
+                    ]
+                },
+                // 15
+                {
+                    question: "Un gruppo in natura litiga. Come intervieni?",
+                    options: [
+                        { text: "Risolvi con analisi obiettiva.", type: "Resolver" },
+                        { text: "Adatti regole per armonia.", type: "Adaptable" },
+                        { text: "Connetti empaticamente.", type: "Altruist" },
+                        { text: "Prendi comando per risolvere.", type: "Leader" }
+                    ]
+                },
+                // 16
+                {
+                    question: "Stress cronico in disastro urbano. Gestisci:",
+                    options: [
+                        { text: "Regola emozioni con respiri.", type: "Regulator" },
+                        { text: "Trovi umorismo nelle assurdità.", type: "Brave" },
+                        { text: "Persisti nelle routine quotidiane.", type: "Persistent" },
+                        { text: "Mantieni salute con esercizio.", type: "Maintainer" }
+                    ]
+                },
+                // 17
+                {
+                    question: "Scopri risorse nascoste in natura. Decidi:",
+                    options: [
+                        { text: "Condividi per rafforzare legami.", type: "Altruist" },
+                        { text: "Pianifichi uso ottimale.", type: "Resolver" },
+                        { text: "Accetti come segno positivo.", type: "Resilient" },
+                        { text: "Adatti piano basandoti su esse.", type: "Adaptable" }
+                    ]
+                },
+                // 18
+                {
+                    question: "Isolamento post-guerra in città. Sopravvivi:",
+                    options: [
+                        { text: "Trovi significato interiore.", type: "Spiritual" },
+                        { text: "Organizzi routine solitarie.", type: "Leader" },
+                        { text: "Rimbalzi da solitudine con positività.", type: "Resilient" },
+                        { text: "Affronti paure motivandoti.", type: "Brave" }
+                    ]
+                },
+                // 19
+                {
+                    question: "Un tuo piano di sopravvivenza fallisce. Come reagisci?",
+                    options: [
+                        { text: "Persisti provando di nuovo allo stesso modo.", type: "Persistent" },
+                        { text: "Regoli le tue emozioni prima di un nuovo tentativo.", type: "Regulator" },
+                        { text: "Ti concentri sul recupero fisico per il prossimo tentativo.", type: "Maintainer" },
+                        { text: "Trovi una lezione spirituale nel fallimento.", type: "Spiritual" }
+                    ]
+                },
+                // 20
+                {
+                    question: "La crisi sta per finire. Il tuo pensiero dominante è:",
+                    options: [
+                        { text: "Connetterti con gli altri per celebrare.", type: "Altruist" },
+                        { text: "Analizzare cosa ha funzionato e cosa no.", type: "Resolver" },
+                        { text: "Adattarti il prima possibile alla nuova normalità.", type: "Adaptable" },
+                        { text: "Restare ottimista per il futuro.", type: "Resilient" }
+                    ]
+                }
+            ];
+
+            // --- RIFERIMENTI DOM ---
+            const startScreen = document.getElementById('start-screen');
+            const quizScreen = document.getElementById('quiz-screen');
+            const resultScreen = document.getElementById('result-screen');
+            
+            const startBtn = document.getElementById('start-btn');
+            // Riferimento al nextBtn rimosso
+            const restartBtn = document.getElementById('restart-btn');
+            
+            const questionCounter = document.getElementById('question-counter');
+            const questionText = document.getElementById('question-text');
+            const optionsContainer = document.getElementById('options-container');
+            
+            const resultsContainer = document.getElementById('results-container');
+            const ctaSection = document.getElementById('cta-section');
+
+            // --- STATO DELL'APP ---
+            let currentQuestionIndex = 0;
+            let scores = {};
+            let selectedOptionType = null;
+            let isAnswered = false; // Aggiunto per prevenire clic multipli
+            const allTypes = ['Leader', 'Resolver', 'Altruist', 'Persistent', 'Regulator', 'Spiritual', 'Maintainer', 'Adaptable', 'Brave', 'Resilient'];
+
+            // --- FUNZIONI ---
+
+            // Inizializza o resetta i punteggi
+            function initScores() {
+                scores = {};
+                allTypes.forEach(type => {
+                    scores[type] = 0;
+                });
+            }
+
+            // Avvia il quiz
+            function startQuiz() {
+                initScores();
+                currentQuestionIndex = 0;
+                startScreen.classList.add('hidden');
+                resultScreen.classList.add('hidden');
+                // Pulisci i risultati precedenti
+                resultsContainer.innerHTML = '';
+                ctaSection.innerHTML = '';
+                quizScreen.classList.remove('hidden');
+                quizScreen.classList.add('fade-in');
+                showQuestion();
+            }
+
+            // Mostra la domanda corrente
+            function showQuestion() {
+                // Resetta lo stato
+                selectedOptionType = null;
+                isAnswered = false; // Resetta la possibilità di rispondere
+                // nextBtn.classList.add('hidden'); // Rimosso
+                optionsContainer.innerHTML = '';
+                
+                // Prendi la domanda corrente
+                const questionData = quizData[currentQuestionIndex];
+                
+                // Aggiorna l'interfaccia
+                questionCounter.textContent = `Domanda ${currentQuestionIndex + 1} / ${quizData.length}`;
+                questionText.textContent = questionData.question;
+                
+                // Crea i bottoni delle opzioni
+                questionData.options.forEach(option => {
+                    const button = document.createElement('button');
+                    button.textContent = option.text;
+                    button.dataset.type = option.type;
+                    button.className = "option-btn w-full text-left p-4 my-2 bg-gray-700 rounded-lg border-2 border-transparent transition-all duration-200 hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-400";
+                    button.onclick = selectOption;
+                    optionsContainer.appendChild(button);
+                });
+            }
+
+            // Gestisce la selezione di un'opzione
+            function selectOption(event) {
+                if (isAnswered) return; // Impedisce clic multipli
+                isAnswered = true; // Blocca ulteriori risposte per questa domanda
+
+                const selectedBtn = event.currentTarget;
+                selectedOptionType = selectedBtn.dataset.type;
+
+                // Rimuovi 'selected' da tutti i bottoni
+                Array.from(optionsContainer.children).forEach(btn => {
+                    btn.classList.remove('selected');
+                });
+                
+                // Aggiungi 'selected' a quello cliccato
+                selectedBtn.classList.add('selected');
+                
+                // Mostra il pulsante 'Prossima'
+                // nextBtn.classList.remove('hidden'); // Rimosso
+
+                // Passa alla prossima domanda dopo un breve ritardo
+                setTimeout(nextQuestion, 300);
+            }
+
+            // Va alla domanda successiva o mostra i risultati
+            function nextQuestion() {
+                if (!selectedOptionType) return; // Non fare nulla se non è stata selezionata un'opzione
+
+                // Registra il punteggio
+                scores[selectedOptionType]++;
+                
+                // Passa alla prossima domanda
+                currentQuestionIndex++;
+                
+                if (currentQuestionIndex < quizData.length) {
+                    showQuestion();
+                } else {
+                    showResults();
+                }
+            }
+
+            // Mostra la schermata dei risultati
+            function showResults() {
+                quizScreen.classList.add('hidden');
+                resultScreen.classList.remove('hidden');
+                resultScreen.classList.add('fade-in');
+                calculateResult();
+            }
+
+            // Calcola il tipo dominante
+            function calculateResult() {
+                const totalQuestions = quizData.length; // 20
+
+                // 1. Converti scores in array e ordina
+                const scoresArray = Object.entries(scores).map(([type, score]) => {
+                    return {
+                        type: type,
+                        score: score,
+                        // Calcola la percentuale basata sulle 20 domande totali
+                        percentage: Math.round((score / totalQuestions) * 100) 
+                    };
+                }).sort((a, b) => b.score - a.score); // Ordina dal punteggio più alto
+
+                // 2. Prendi i primi 3
+                const topThree = scoresArray.slice(0, 3);
+                const dominantProfile = topThree[0];
+                const dominantData = typeDescriptions[dominantProfile.type];
+
+                // 3. Costruisci l'HTML per i risultati
+                let resultsHTML = '';
+
+                // Profilo Dominante (con descrizione)
+                resultsHTML += `
+                    <div class="bg-gray-900 p-6 rounded-lg shadow-inner mb-6">
+                        <div class="flex justify-between items-start sm:items-center mb-3 flex-col sm:flex-row">
+                            <h2 class="text-2xl font-bold text-white mb-2 sm:mb-0">${dominantData.title}</h2>
+                            <span class="text-3xl font-bold text-blue-300">${dominantProfile.percentage}%</span>
+                        </div>
+                        <p class="text-gray-300 leading-relaxed">${dominantData.description}</p>
+                    </div>
+                `;
+
+                // Profili Secondari (senza descrizione)
+                if (topThree.length > 1 && topThree[1].score > 0) {
+                    resultsHTML += `<h3 class="text-xl font-semibold text-gray-200 mb-3 mt-8">I tuoi profili secondari:</h3>`;
+                    resultsHTML += `<div class="grid grid-cols-1 md:grid-cols-2 gap-4">`;
+                    
+                    for (let i = 1; i < topThree.length; i++) {
+                        const profile = topThree[i];
+                        if (profile.score > 0) { // Mostra solo se hanno almeno un punto
+                            const profileData = typeDescriptions[profile.type];
+                            resultsHTML += `
+                                <div class="bg-gray-700 p-4 rounded-lg shadow-md">
+                                    <div class="flex justify-between items-center">
+                                        <h4 class="text-lg font-bold text-white">${profileData.title}</h4>
+                                        <span class="text-xl font-bold text-blue-300">${profile.percentage}%</span>
+                                    </div>
+                                </div>
+                            `;
+                        }
+                    }
+                    resultsHTML += `</div>`;
+                }
+                
+                // 4. Inserisci l'HTML dei risultati
+                resultsContainer.innerHTML = resultsHTML;
+
+                // 5. Costruisci i bottoni CTA
+                const blogURL = "https://spiritoindomito.it";
+                const blogLink = dominantData.url;
+                const shareText = `Ho fatto il test di sopravvivenza di SpiritoIndomito.it e il mio profilo dominante è "${dominantData.title}"! Scopri il tuo:`;
+                // Assumo che il quiz sarà sulla homepage o una pagina dedicata. Modifica 'blogURL' se il quiz si trova altrove.
+                const shareLink = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(blogURL)}`; 
+
+                let ctaHTML = `
+                    <a href="${blogLink}" target="_blank" class="block w-full sm:w-auto sm:inline-block bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition-all duration-300 shadow-lg transform hover:scale-105 mb-4">
+                        Leggi di più su "${dominantData.title}"
+                    </a>
+                    <a href="${shareLink}" target="_blank" class="block w-full sm:w-auto sm:inline-block bg-sky-500 hover:bg-sky-600 text-white font-bold py-3 px-8 rounded-lg text-lg transition-all duration-300 shadow-lg transform hover:scale-105 mb-4">
+                        Condividi il tuo risultato
+                    </a>
+                `;
+                ctaSection.innerHTML = ctaHTML;
+            }
+
+            // Riavvia il quiz
+            function restartQuiz() {
+                resultScreen.classList.add('hidden');
+                startScreen.classList.remove('hidden');
+                startScreen.classList.add('fade-in');
+            }
+
+            // --- EVENT LISTENERS INIZIALI ---
+            startBtn.onclick = startQuiz;
+            // nextBtn.onclick = nextQuestion; // Rimosso
+            restartBtn.onclick = restartQuiz;
+
+        });
+    </script>
+</body>
+</html>
