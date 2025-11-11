@@ -537,21 +537,76 @@
                 resultsContainer.innerHTML = resultsHTML;
 
                 // 5. Costruisci i bottoni CTA
-                const blogURL = "https://spiritoindomito.it";
+                const blogURL = "https://spiritoindomito.it"; // URL principale del tuo blog
                 const blogLink = dominantData.url;
-                const shareText = `Ho fatto il test di sopravvivenza di SpiritoIndomito.it e il mio profilo dominante è "${dominantData.title}"! Scopri il tuo:`;
-                // Assumo che il quiz sarà sulla homepage o una pagina dedicata. Modifica 'blogURL' se il quiz si trova altrove.
-                const shareLink = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(blogURL)}`; 
-
+                
+                // ** MODIFICA PER WEB SHARE API **
+                // Questo non è più un link <a>, ma un <button>
                 let ctaHTML = `
                     <a href="${blogLink}" target="_blank" class="block w-full sm:w-auto sm:inline-block bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition-all duration-300 shadow-lg transform hover:scale-105 mb-4">
                         Leggi di più su "${dominantData.title}"
                     </a>
-                    <a href="${shareLink}" target="_blank" class="block w-full sm:w-auto sm:inline-block bg-sky-500 hover:bg-sky-600 text-white font-bold py-3 px-8 rounded-lg text-lg transition-all duration-300 shadow-lg transform hover:scale-105 mb-4">
+                    <button id="share-btn" class="block w-full sm:w-auto sm:inline-block bg-sky-500 hover:bg-sky-600 text-white font-bold py-3 px-8 rounded-lg text-lg transition-all duration-300 shadow-lg transform hover:scale-105 mb-4">
                         Condividi il tuo risultato
-                    </a>
+                    </button>
                 `;
                 ctaSection.innerHTML = ctaHTML;
+
+                // 6. Aggiungi l'event listener per il nuovo pulsante di condivisione
+                document.getElementById('share-btn').addEventListener('click', () => {
+                    const shareData = {
+                        title: 'Il mio Profilo di Sopravvivenza',
+                        text: `Ho fatto il test di sopravvivenza di SpiritoIndomito.it e il mio profilo dominante è "${dominantData.title}"! Scopri il tuo:`,
+                        url: blogURL // Condivide il link principale del blog
+                    };
+                    shareResult(shareData);
+                });
+            }
+
+            // ** NUOVA FUNZIONE PER LA CONDIVISIONE **
+            async function shareResult(shareData) {
+                const shareButton = document.getElementById('share-btn');
+                
+                if (navigator.share) {
+                    try {
+                        // Se l'API Web Share è supportata (es. smartphone)
+                        await navigator.share(shareData);
+                        // L'utente ha condiviso o ha chiuso la finestra
+                    } catch (err) {
+                        // L'utente ha annullato la condivisione, non facciamo nulla
+                    }
+                } else {
+                    // Fallback per browser desktop: Copia Link
+                    copyLinkToClipboard(shareData.url, shareButton);
+                }
+            }
+
+            // ** NUOVA FUNZIONE HELPER PER COPIARE IL LINK **
+            function copyLinkToClipboard(textToCopy, buttonElement) {
+                const tempTextArea = document.createElement('textarea');
+                tempTextArea.value = textToCopy;
+                // Evita di far "saltare" la pagina
+                tempTextArea.style.position = 'absolute';
+                tempTextArea.style.left = '-9999px';
+                
+                document.body.appendChild(tempTextArea);
+                tempTextArea.select();
+                
+                try {
+                    document.execCommand('copy');
+                    // Feedback per l'utente
+                    const originalText = buttonElement.textContent;
+                    buttonElement.textContent = 'Link Copiato!';
+                    buttonElement.disabled = true;
+                    setTimeout(() => {
+                        buttonElement.textContent = originalText;
+                        buttonElement.disabled = false;
+                    }, 2000);
+                } catch (err) {
+                    // Errore nel copiare (raro)
+                }
+                
+                document.body.removeChild(tempTextArea);
             }
 
             // Riavvia il quiz
@@ -569,5 +624,3 @@
     </script>
 </body>
 </html>
-
-
