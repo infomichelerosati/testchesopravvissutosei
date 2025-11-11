@@ -41,10 +41,18 @@
         }
     </style>
 </head>
-<body class="bg-gray-900 text-gray-100 flex items-center justify-center min-h-screen p-4">
+<!-- 
+  MODIFICA IMPORTANTE: 
+  Ho rimosso 'flex items-center justify-center' 
+  e aggiunto 'py-8' (padding verticale).
+  Questo assicura che il contenuto si allinei in alto 
+  e permetta lo scorrimento naturale se diventa più lungo 
+  dell'altezza dell'iframe.
+-->
+<body class="bg-gray-900 text-gray-100 min-h-screen p-4 py-8">
 
     <!-- Contenitore principale dell'app -->
-    <div id="app-container" class="bg-gray-800 p-6 sm:p-10 rounded-2xl shadow-2xl max-w-2xl w-full min-h-[400px] flex flex-col justify-center">
+    <div id="app-container" class="bg-gray-800 p-6 sm:p-10 rounded-2xl shadow-2xl max-w-2xl w-full mx-auto">
 
         <!-- 1. Schermata Iniziale -->
         <div id="start-screen" class="text-center fade-in">
@@ -65,15 +73,9 @@
                 <h2 id="question-text" class="text-2xl sm:text-3xl font-bold mt-2 min-h-[100px]"></h2>
             </div>
             
-            <!-- ***** INIZIO CODICE CORRETTO ***** -->
-            <!-- Questo contenitore era mancante e causava l'errore -->
             <div id="options-container" class="flex flex-col gap-3">
                 <!-- Le opzioni verranno inserite qui da JS -->
             </div>
-            <!-- ***** FINE CODICE CORRETTO ***** -->
-
-            <!-- Il pulsante "Prossima" è stato rimosso -->
-            <!-- <button id="next-btn" ... >Prossima</button> -->
         </div>
 
         <!-- 3. Schermata Risultati (Nascosta di default) -->
@@ -107,52 +109,52 @@
                 Leader: {
                     title: "Il Leader Organizzatore",
                     description: "Forte nel guidare gruppi, assegnare ruoli e mantenere l'ordine. In un ambiente urbano post-guerra, organizza squadre per razionare cibo; in natura, coordina la costruzione di rifugi. Debolezza: Può ignorare input individuali se troppo autoritario.",
-                    url: "https://spiritoindomito.it"
+                    url: "https://spiritoindomito.it/POST-PER-LEADER"
                 },
                 Resolver: {
                     title: "Il Risolutore di Problemi",
                     description: "Eccelle nel pensare strategicamente e trovare soluzioni creative a ostacoli. In una città disastrata, improvvisa armi da detriti; in natura, costruisce trappole per cibo. Debolezza: Potrebbe sovraccaricarsi analizzando troppo.",
-                    url: "https://spiritoindomito.it"
+                    url: "https://spiritoindomito.it/POST-PER-RISOLUTORI"
                 },
                 Altruist: {
                     title: "L'Altruista Connettore",
                     description: "Prioritizza l'aiuto agli altri, costruendo alleanze e supporto emotivo. In scenari urbani, forma comunità per condividere risorse; in natura, sacrifica per il gruppo. Debolezza: Rischia di trascurare la propria sopravvivenza.",
-                    url: "https://spiritoindomito.it"
+                    url: "https://spiritoindomito.it/POST-PER-ALTRUISTI"
                 },
                 Persistent: {
                     title: "Lo Stubborn Persistente",
-                    description: "Non si arrende mai, mantenendo tenacia nonostante le avversità. In un disastro urbano, continua a scavare tra le macerie; in ambienti naturali, marcia per giorni senza cibo. Debolelezza: Può essere inflessibile a cambiamenti necessari.",
-                    url: "https://spiritoindomito.it"
+                    description: "Non si arrende mai, mantenendo tenacia nonostante le avversità. In un disastro urbano, continua a scavare tra le macerie; in ambienti naturali, marcia per giorni senza cibo. Debolezza: Può essere inflessibile a cambiamenti necessari.",
+                    url: "https://spiritoindomito.it/POST-PER-PERSEVERANTI"
                 },
                 Regulator: {
                     title: "Il Regolatore Emotivo",
-                    description: "Gestisce lo stress e rimane calmo, evitando panico. In città sotto assedio, mantiene la lucidità during i bombardamenti; in natura, controlla la paura durante tempeste. Debolezza: Potrebbe sopprimere emozioni utili come la rabbia motivante.",
-                    url: "https://spiritoindomito.it"
+                    description: "Gestisce lo stress e rimane calmo, evitando panico. In città sotto assedio, mantiene la lucidità durante i bombardamenti; in natura, controlla la paura durante tempeste. Debolezza: Potrebbe sopprimere emozioni utili come la rabbia motivante.",
+                    url: "https://spiritoindomito.it/POST-PER-REGOLATARI-EMOTIVI"
                 },
                 Spiritual: {
                     title: "Il Trascendente Spirituale",
                     description: "Trova significato profondo nella sopravvivenza, usando fede o scopo per motivarsi. In ambienti urbani, ispira speranza tra sopravvissuti; in natura, medita per resilienza mentale. Debolezza: Può distaccarsi troppo dalla realtà pratica.",
-                    url: "https://spiritoindomito.it"
+                    url: "https://spiritoindomito.it/POST-PER-SPIRITUALI"
                 },
                 Maintainer: {
                     title: "Il Mantenitore Attivo",
                     description: "Focalizzato su salute fisica e mentale, ottimizzando energia e risorse. In disastri urbani, gestisce igiene per prevenire malattie; in natura, bilancia sonno e attività. Debolezza: Potrebbe essere troppo cauto, evitando rischi necessari.",
-                    url: "https://spiritoindomito.it"
+                    url: "https://spiritoindomito.it/POST-PER-MANTENITORI"
                 },
                 Adaptable: {
                     title: "L'Adattabile Flessibile",
                     description: "Cambia rapidamente strategie in base alle circostanze. In una città in rovina, passa dal rovistare al baratto; in ambienti naturali, si adatta a climi variabili. Debolezza: Mancanza di piani a lungo termine.",
-                    url: "https://spiritoindomito.it"
+                    url: "https://spiritoindomito.it/POST-PER-ADATTABILI"
                 },
                 Brave: {
                     title: "Il Coraggioso Motivato",
                     description: "Affronta paure con umorismo e motivazione interna (es. famiglia o fede). In scenari urbani, carica contro minacce; in natura, usa umorismo per mantenere morale. Debolezza: Rischio di impulsività.",
-                    url: "https://spiritoindomito.it"
+                    url: "https://spiritoindomito.it/POST-PER-CORAGGIOSI"
                 },
                 Resilient: {
                     title: "Il Resiliente Ottimista",
                     description: "Rimbalza da fallimenti, mantenendo positività e accettazione della realtà. In disastri, vede opportunità nelle crisi; in natura, accetta perdite e riparte. Debolezza: Potrebbe minimizzare pericoli reali.",
-                    url: "https://spiritoindomito.it"
+                    url: "https://spiritoindomito.it/POST-PER-OTTIMISTI"
                 }
             };
             
@@ -366,7 +368,6 @@
             const resultScreen = document.getElementById('result-screen');
             
             const startBtn = document.getElementById('start-btn');
-            // Riferimento al nextBtn rimosso
             const restartBtn = document.getElementById('restart-btn');
             
             const questionCounter = document.getElementById('question-counter');
@@ -412,7 +413,6 @@
                 // Resetta lo stato
                 selectedOptionType = null;
                 isAnswered = false; // Resetta la possibilità di rispondere
-                // nextBtn.classList.add('hidden'); // Rimosso
                 optionsContainer.innerHTML = '';
                 
                 // Prendi la domanda corrente
@@ -449,9 +449,6 @@
                 // Aggiungi 'selected' a quello cliccato
                 selectedBtn.classList.add('selected');
                 
-                // Mostra il pulsante 'Prossima'
-                // nextBtn.classList.remove('hidden'); // Rimosso
-
                 // Passa alla prossima domanda dopo un breve ritardo
                 setTimeout(nextQuestion, 300);
             }
@@ -566,7 +563,6 @@
 
             // --- EVENT LISTENERS INIZIALI ---
             startBtn.onclick = startQuiz;
-            // nextBtn.onclick = nextQuestion; // Rimosso
             restartBtn.onclick = restartQuiz;
 
         });
